@@ -1,0 +1,33 @@
+name: "setup-jarl"
+description: "A GitHub Action to run Jarl, an extremely fast R linter."
+author: "etiennebacher"
+inputs:
+  args:
+    description: "Arguments passed to Jarl. Use `jarl --help` to see available options. Defaults to `check`."
+    required: false
+    # TODO: "--output-format github" should be removed eventually since the .ts file set the envvar
+    # JARL_OUTPUT_FORMAT to "github" but this envvar isn't supported by Jarl yet.
+    default: "check --output-format github"
+  src:
+    description: "Source to run Jarl. Defaults to the current directory."
+    required: false
+    default: ${{ github.workspace }}
+  version:
+    description: "The version of Jarl to use, e.g., `0.6.0` Defaults to the version in pyproject.toml or 'latest'."
+    required: false
+    default: ""
+  github-token:
+    description:
+      "Used to increase the rate limit when retrieving versions and downloading
+      jarl."
+    required: false
+    default: ${{ github.token }}
+outputs:
+  jarl-version:
+    description: "The installed jarl version. Useful when using latest."
+runs:
+  using: "node20"
+  main: "dist/setup-jarl/index.js"
+branding:
+  icon: "code"
+  color: "black"
