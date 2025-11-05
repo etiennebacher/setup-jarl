@@ -9,7 +9,6 @@ import * as pep440 from "@renovatebot/pep440";
 import * as semver from "semver";
 import { OWNER, REPO, TOOL_CACHE_NAME } from "../utils/constants";
 import type { Architecture, Platform } from "../utils/platforms";
-import { validateChecksum } from "./checksum/checksum";
 
 const PaginatingOctokit = Octokit.plugin(paginateRest, restEndpointMethods);
 
@@ -32,7 +31,6 @@ export async function downloadVersion(
   platform: Platform,
   arch: Architecture,
   version: string,
-  checkSum: string | undefined,
   githubToken: string,
 ): Promise<{ version: string; cachedToolDir: string }> {
   const artifact = `jarl-${arch}-${platform}`;
@@ -49,7 +47,6 @@ export async function downloadVersion(
     githubToken,
   );
   core.debug(`Downloaded jarl to "${downloadPath}"`);
-  await validateChecksum(checkSum, downloadPath, arch, platform, version);
 
   const extractedDir = await extractDownloadedArtifact(
     version,

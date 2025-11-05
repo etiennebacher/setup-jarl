@@ -10,11 +10,9 @@ import {
 } from "./download/download-version";
 import {
   args,
-  checkSum,
   githubToken,
   src,
   version,
-  versionFile as versionFileInput,
 } from "./utils/inputs";
 import {
   type Architecture,
@@ -22,7 +20,6 @@ import {
   getPlatform,
   type Platform,
 } from "./utils/platforms";
-import { getJarlVersionFromRequirementsFile } from "./utils/pyproject";
 
 async function run(): Promise<void> {
   const platform = getPlatform();
@@ -35,7 +32,7 @@ async function run(): Promise<void> {
     if (arch === undefined) {
       throw new Error(`Unsupported architecture: ${process.arch}`);
     }
-    const setupResult = await setupJarl(platform, arch, checkSum, githubToken);
+    const setupResult = await setupJarl(platform, arch, githubToken);
 
     addJarlToPath(setupResult.jarlDir);
     setOutputFormat();
@@ -58,7 +55,6 @@ async function run(): Promise<void> {
 async function setupJarl(
   platform: Platform,
   arch: Architecture,
-  checkSum: string | undefined,
   githubToken: string,
 ): Promise<{ jarlDir: string; version: string }> {
   const resolvedVersion = await determineVersion();
@@ -80,7 +76,6 @@ async function setupJarl(
     platform,
     arch,
     resolvedVersion,
-    checkSum,
     githubToken,
   );
 
@@ -91,35 +86,10 @@ async function setupJarl(
 }
 
 async function determineVersion(): Promise<string> {
-  if (versionFileInput !== "" && version !== "") {
-    throw Error("It is not allowed to specify both version and version-file");
-  }
   if (version !== "") {
     return await resolveVersion(version, githubToken);
   }
-  if (versionFileInput !== "") {
-    const versionFromPyproject =
-      getJarlVersionFromRequirementsFile(versionFileInput);
-    if (versionFromPyproject === undefined) {
-      core.warning(
-        `Could not parse version from ${versionFileInput}. Using latest version.`,
-      );
-    }
-    return await resolveVersion(versionFromPyproject || "latest", githubToken);
-  }
-  const pyProjectPath = path.join(src, "pyproject.toml");
-  if (!fs.existsSync(pyProjectPath)) {
-    core.info(`Could not find ${pyProjectPath}. Using latest version.`);
-    return await resolveVersion("latest", githubToken);
-  }
-  const versionFromPyproject =
-    getJarlVersionFromRequirementsFile(pyProjectPath);
-  if (versionFromPyproject === undefined) {
-    core.info(
-      `Could not parse version from ${pyProjectPath}. Using latest version.`,
-    );
-  }
-  return await resolveVersion(versionFromPyproject || "latest", githubToken);
+  return await resolveVersion("latest", githubToken);
 }
 
 function addJarlToPath(cachedPath: string): void {
