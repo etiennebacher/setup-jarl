@@ -58,11 +58,6 @@ async function setupJarl(
   githubToken: string,
 ): Promise<{ jarlDir: string; version: string }> {
   const resolvedVersion = await determineVersion();
-  if (semver.lt(resolvedVersion, "v0.0.247")) {
-    throw Error(
-      "This action does not support jarl versions older than 0.0.247",
-    );
-  }
   const toolCacheResult = tryGetFromToolCache(arch, resolvedVersion);
   if (toolCacheResult.installedPath) {
     core.info(`Found jarlDir in tool-cache for ${toolCacheResult.version}`);
@@ -110,7 +105,6 @@ function addMatchers(): void {
     "matchers",
   );
   core.info(`##[add-matcher]${path.join(matchersPath, "check.json")}`);
-  core.info(`##[add-matcher]${path.join(matchersPath, "format.json")}`);
 }
 
 async function runJarl(

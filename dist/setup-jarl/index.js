@@ -29216,7 +29216,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const path = __importStar(__nccwpck_require__(6760));
 const core = __importStar(__nccwpck_require__(7484));
 const exec = __importStar(__nccwpck_require__(5236));
-const semver = __importStar(__nccwpck_require__(9318));
 const download_version_1 = __nccwpck_require__(8255);
 const inputs_1 = __nccwpck_require__(9612);
 const platforms_1 = __nccwpck_require__(8361);
@@ -29245,9 +29244,6 @@ async function run() {
 }
 async function setupJarl(platform, arch, githubToken) {
     const resolvedVersion = await determineVersion();
-    if (semver.lt(resolvedVersion, "v0.0.247")) {
-        throw Error("This action does not support jarl versions older than 0.0.247");
-    }
     const toolCacheResult = (0, download_version_1.tryGetFromToolCache)(arch, resolvedVersion);
     if (toolCacheResult.installedPath) {
         core.info(`Found jarlDir in tool-cache for ${toolCacheResult.version}`);
@@ -29279,7 +29275,6 @@ function setOutputFormat() {
 function addMatchers() {
     const matchersPath = path.join(__dirname, `..${path.sep}..`, ".github", "matchers");
     core.info(`##[add-matcher]${path.join(matchersPath, "check.json")}`);
-    core.info(`##[add-matcher]${path.join(matchersPath, "format.json")}`);
 }
 async function runJarl(jarlExecutablePath, args, src) {
     const execArgs = [...args, ...src];
