@@ -32,13 +32,13 @@ anything `jarl` can (ex, fix).
 ### Basic
 
 ```yaml
-- uses: etiennebacher/setup-jarl@v1
+- uses: etiennebacher/setup-jarl@v0.1.0
 ```
 
 ### Specify a different source directory
 
 ```yaml
-- uses: etiennebacher/setup-jarl@v1
+- uses: etiennebacher/setup-jarl@v0.1.0
   with:
     src: "./R"
 ```
@@ -46,7 +46,7 @@ anything `jarl` can (ex, fix).
 ### Specify multiple files
 
 ```yaml
-- uses: etiennebacher/setup-jarl@v1
+- uses: etiennebacher/setup-jarl@v0.1.0
   with:
     src: >-
       path/to/file1.r
@@ -58,7 +58,7 @@ anything `jarl` can (ex, fix).
 This action adds jarl to the PATH, so you can use it in subsequent steps.
 
 ```yaml
-- uses: etiennebacher/setup-jarl@v1
+- uses: etiennebacher/setup-jarl@v0.1.0
 - run: jarl check --fix
 ```
 
@@ -68,7 +68,7 @@ you can use the `args` input to overwrite the default value (`check`):
 
 ```yaml
 - name: Install jarl without running check
-  uses: etiennebacher/setup-jarl@v1
+  uses: etiennebacher/setup-jarl@v0.1.0
   with:
     args: "--version"
 ```
@@ -79,7 +79,7 @@ you can use the `args` input to overwrite the default value (`check`):
 
 ```yaml
 - name: Install the latest version of jarl
-  uses: etiennebacher/setup-jarl@v1
+  uses: etiennebacher/setup-jarl@v0.1.0
   with:
     version: "latest"
 ```
@@ -88,7 +88,7 @@ you can use the `args` input to overwrite the default value (`check`):
 
 ```yaml
 - name: Install a specific version of jarl
-  uses: etiennebacher/setup-jarl@v1
+  uses: etiennebacher/setup-jarl@v0.1.0
   with:
     version: "0.4.4"
 ```
@@ -105,7 +105,7 @@ are not sufficient, you can provide a custom GitHub token with the necessary per
 
 ```yaml
 - name: Install the latest version of jarl with a custom GitHub token
-  uses: etiennebacher/setup-jarl@v1
+  uses: etiennebacher/setup-jarl@v0.1.0
   with:
     github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
 ```
