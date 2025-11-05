@@ -41,11 +41,7 @@ export async function downloadVersion(
   const downloadUrl = constructDownloadUrl(version, platform, arch);
   core.debug(`Downloading jarl from "${downloadUrl}" ...`);
 
-  const downloadPath = await tc.downloadTool(
-    downloadUrl,
-    undefined,
-    githubToken,
-  );
+  const downloadPath = await tc.downloadTool(downloadUrl, undefined, githubToken);
   core.debug(`Downloaded jarl to "${downloadPath}"`);
 
   const extractedDir = await extractDownloadedArtifact(
@@ -56,12 +52,7 @@ export async function downloadVersion(
     artifact,
   );
 
-  const cachedToolDir = await tc.cacheDir(
-    extractedDir,
-    TOOL_CACHE_NAME,
-    version,
-    arch,
-  );
+  const cachedToolDir = await tc.cacheDir(extractedDir, TOOL_CACHE_NAME, version, arch);
   return { cachedToolDir, version: version };
 }
 
@@ -70,17 +61,15 @@ function constructDownloadUrl(
   platform: Platform,
   arch: Architecture,
 ): string {
-  const artifactVersionSuffix =
-    semver.lte(version, "v0.4.10") && semver.gte(version, "v0.1.8")
-      ? `-${version}`
-      : "";
-  const artifact = `jarl${artifactVersionSuffix}-${arch}-${platform}`;
+  // Current jarl releases use format: jarl-{arch}-{platform}.tar.gz
+  // with no version suffix in the artifact name
+  const artifact = `jarl-${arch}-${platform}`;
   let extension = ".tar.gz";
   if (platform === "pc-windows-msvc") {
     extension = ".zip";
   }
-  const versionPrefix = semver.lte(version, "v0.4.10") ? "v" : "";
-  return `https://github.com/${OWNER}/${REPO}/releases/download/${versionPrefix}${version}/${artifact}${extension}`;
+  // Current jarl releases don't use a 'v' prefix in tags (e.g., 0.0.19 not v0.0.19)
+  return `https://github.com/${OWNER}/${REPO}/releases/download/${version}/${artifact}${extension}`;
 }
 
 async function extractDownloadedArtifact(
@@ -98,10 +87,8 @@ async function extractDownloadedArtifact(
     // On windows extracting the zip does not create an intermediate directory
   } else {
     jarlDir = await tc.extractTar(downloadPath);
-    if (semver.gte(version, "v0.5.0")) {
-      // Since v0.5.0 an intermediate directory is created
-      jarlDir = path.join(jarlDir, artifact);
-    }
+    // Current jarl releases create an intermediate directory
+    jarlDir = path.join(jarlDir, artifact);
   }
   const files = await fs.readdir(jarlDir);
   core.debug(`Contents of ${jarlDir}: ${files.join(", ")}`);
@@ -114,9 +101,7 @@ export async function resolveVersion(
 ): Promise<string> {
   core.debug(`Resolving ${versionInput}...`);
   const version =
-    versionInput === "latest"
-      ? await getLatestVersion(githubToken)
-      : versionInput;
+    versionInput === "latest" ? await getLatestVersion(githubToken) : versionInput;
   if (tc.isExplicitVersion(version)) {
     core.debug(`Version ${version} is an explicit version.`);
     return version;
@@ -193,9 +178,7 @@ async function getLatestVersion(githubToken: string) {
   return latestRelease.tag_name;
 }
 
-async function getLatestRelease(
-  octokit: InstanceType<typeof PaginatingOctokit>,
-) {
+async function getLatestRelease(octokit: InstanceType<typeof PaginatingOctokit>) {
   const { data: latestRelease } = await octokit.rest.repos.getLatestRelease({
     owner: OWNER,
     repo: REPO,
@@ -203,10 +186,7 @@ async function getLatestRelease(
   return latestRelease;
 }
 
-function maxSatisfying(
-  versions: string[],
-  version: string,
-): string | undefined {
+function maxSatisfying(versions: string[], version: string): string | undefined {
   const maxSemver = tc.evaluateVersions(versions, version);
   if (maxSemver !== "") {
     core.debug(`Found a version that satisfies the semver range: ${maxSemver}`);
@@ -214,9 +194,7 @@ function maxSatisfying(
   }
   const maxPep440 = pep440.maxSatisfying(versions, version);
   if (maxPep440 !== null) {
-    core.debug(
-      `Found a version that satisfies the pep440 specifier: ${maxPep440}`,
-    );
+    core.debug(`Found a version that satisfies the pep440 specifier: ${maxPep440}`);
     return maxPep440;
   }
   return undefined;

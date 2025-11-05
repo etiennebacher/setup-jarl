@@ -29023,7 +29023,6 @@ const core_1 = __nccwpck_require__(767);
 const plugin_paginate_rest_1 = __nccwpck_require__(3779);
 const plugin_rest_endpoint_methods_1 = __nccwpck_require__(9210);
 const pep440 = __importStar(__nccwpck_require__(3297));
-const semver = __importStar(__nccwpck_require__(9318));
 const constants_1 = __nccwpck_require__(6156);
 const PaginatingOctokit = core_1.Octokit.plugin(plugin_paginate_rest_1.paginateRest, plugin_rest_endpoint_methods_1.restEndpointMethods);
 function tryGetFromToolCache(arch, version) {
@@ -29052,16 +29051,15 @@ async function downloadVersion(platform, arch, version, githubToken) {
     return { cachedToolDir, version: version };
 }
 function constructDownloadUrl(version, platform, arch) {
-    const artifactVersionSuffix = semver.lte(version, "v0.4.10") && semver.gte(version, "v0.1.8")
-        ? `-${version}`
-        : "";
-    const artifact = `jarl${artifactVersionSuffix}-${arch}-${platform}`;
+    // Current jarl releases use format: jarl-{arch}-{platform}.tar.gz
+    // with no version suffix in the artifact name
+    const artifact = `jarl-${arch}-${platform}`;
     let extension = ".tar.gz";
     if (platform === "pc-windows-msvc") {
         extension = ".zip";
     }
-    const versionPrefix = semver.lte(version, "v0.4.10") ? "v" : "";
-    return `https://github.com/${constants_1.OWNER}/${constants_1.REPO}/releases/download/${versionPrefix}${version}/${artifact}${extension}`;
+    // Current jarl releases don't use a 'v' prefix in tags (e.g., 0.0.19 not v0.0.19)
+    return `https://github.com/${constants_1.OWNER}/${constants_1.REPO}/releases/download/${version}/${artifact}${extension}`;
 }
 async function extractDownloadedArtifact(version, downloadPath, extension, platform, artifact) {
     let jarlDir;
@@ -29073,10 +29071,8 @@ async function extractDownloadedArtifact(version, downloadPath, extension, platf
     }
     else {
         jarlDir = await tc.extractTar(downloadPath);
-        if (semver.gte(version, "v0.5.0")) {
-            // Since v0.5.0 an intermediate directory is created
-            jarlDir = path.join(jarlDir, artifact);
-        }
+        // Current jarl releases create an intermediate directory
+        jarlDir = path.join(jarlDir, artifact);
     }
     const files = await node_fs_1.promises.readdir(jarlDir);
     core.debug(`Contents of ${jarlDir}: ${files.join(", ")}`);
@@ -29084,9 +29080,7 @@ async function extractDownloadedArtifact(version, downloadPath, extension, platf
 }
 async function resolveVersion(versionInput, githubToken) {
     core.debug(`Resolving ${versionInput}...`);
-    const version = versionInput === "latest"
-        ? await getLatestVersion(githubToken)
-        : versionInput;
+    const version = versionInput === "latest" ? await getLatestVersion(githubToken) : versionInput;
     if (tc.isExplicitVersion(version)) {
         core.debug(`Version ${version} is an explicit version.`);
         return version;
