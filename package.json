@@ -1,8 +1,8 @@
 {
   "name": "setup-jarl",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "A GitHub Action to run Jarl, an extremely fast Python linter and code formatter.",
+  "description": "A GitHub Action to run Jarl, a fast R linter.",
   "main": "dist/setup-jarl/index.js",
   "scripts": {
     "build": "tsc",
