@@ -26,7 +26,7 @@ outputs:
   jarl-version:
     description: "The installed jarl version. Useful when using latest."
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/setup-jarl/index.js"
 branding:
   icon: "code"
