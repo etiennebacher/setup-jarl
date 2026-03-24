@@ -29226,7 +29226,6 @@ async function run() {
         const setupResult = await setupJarl(platform, arch, inputs_1.githubToken);
         addJarlToPath(setupResult.jarlDir);
         setOutputFormat();
-        addMatchers();
         core.setOutput("jarl-version", setupResult.version);
         core.info(`Successfully installed jarl version ${setupResult.version}`);
         const parsedArgs = inputs_1.args.split(" ");
@@ -29267,10 +29266,6 @@ function addJarlToPath(cachedPath) {
 function setOutputFormat() {
     core.exportVariable("JARL_OUTPUT_FORMAT", "github");
     core.info("Set JARL_OUTPUT_FORMAT to github");
-}
-function addMatchers() {
-    const matchersPath = path.join(__dirname, `..${path.sep}..`, ".github", "matchers");
-    core.info(`##[add-matcher]${path.join(matchersPath, "check.json")}`);
 }
 function validateNoPathInArgs(args) {
     // Skip the first arg (index 0) since this should be "check". Any non-flag

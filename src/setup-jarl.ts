@@ -36,7 +36,6 @@ async function run(): Promise<void> {
 
     addJarlToPath(setupResult.jarlDir);
     setOutputFormat();
-    addMatchers();
     core.setOutput("jarl-version", setupResult.version);
     core.info(`Successfully installed jarl version ${setupResult.version}`);
 
@@ -98,16 +97,6 @@ function addJarlToPath(cachedPath: string): void {
 function setOutputFormat() {
   core.exportVariable("JARL_OUTPUT_FORMAT", "github");
   core.info("Set JARL_OUTPUT_FORMAT to github");
-}
-
-function addMatchers(): void {
-  const matchersPath = path.join(
-    __dirname,
-    `..${path.sep}..`,
-    ".github",
-    "matchers",
-  );
-  core.info(`##[add-matcher]${path.join(matchersPath, "check.json")}`);
 }
 
 function validateNoPathInArgs(args: string[]): void {
