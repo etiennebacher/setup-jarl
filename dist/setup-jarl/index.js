@@ -29229,7 +29229,9 @@ async function run() {
         addMatchers();
         core.setOutput("jarl-version", setupResult.version);
         core.info(`Successfully installed jarl version ${setupResult.version}`);
-        await runJarl(path.join(setupResult.jarlDir, "jarl"), inputs_1.args.split(" "), inputs_1.src.split(" "));
+        const parsedArgs = inputs_1.args.split(" ");
+        validateNoPathInArgs(parsedArgs);
+        await runJarl(path.join(setupResult.jarlDir, "jarl"), parsedArgs, inputs_1.src.split(" "));
         process.exit(0);
     }
     catch (err) {
@@ -29269,6 +29271,22 @@ function setOutputFormat() {
 function addMatchers() {
     const matchersPath = path.join(__dirname, `..${path.sep}..`, ".github", "matchers");
     core.info(`##[add-matcher]${path.join(matchersPath, "check.json")}`);
+}
+function validateNoPathInArgs(args) {
+    // Skip the first arg (index 0) since this should be "check". Any non-flag
+    // argument that doesn't immediately follow a "--" flag is a positional
+    // argument (i.e., a path).
+    for (let i = 1; i < args.length; i++) {
+        const arg = args[i];
+        if (arg.startsWith("--")) {
+            continue;
+        }
+        // If the previous argument is a "--" flag, this is its value — skip it.
+        if (args[i - 1].startsWith("--")) {
+            continue;
+        }
+        throw new Error(`It looks like a path ("${arg}") was passed in 'args'. Use the 'src' input to specify paths instead.`);
+    }
 }
 async function runJarl(jarlExecutablePath, args, src) {
     const execArgs = [...args, ...src];

@@ -40,9 +40,12 @@ async function run(): Promise<void> {
     core.setOutput("jarl-version", setupResult.version);
     core.info(`Successfully installed jarl version ${setupResult.version}`);
 
+    const parsedArgs = args.split(" ");
+    validateNoPathInArgs(parsedArgs);
+
     await runJarl(
       path.join(setupResult.jarlDir, "jarl"),
-      args.split(" "),
+      parsedArgs,
       src.split(" "),
     );
 
@@ -105,6 +108,25 @@ function addMatchers(): void {
     "matchers",
   );
   core.info(`##[add-matcher]${path.join(matchersPath, "check.json")}`);
+}
+
+function validateNoPathInArgs(args: string[]): void {
+  // Skip the first arg (index 0) since this should be "check". Any non-flag
+  // argument that doesn't immediately follow a "--" flag is a positional
+  // argument (i.e., a path).
+  for (let i = 1; i < args.length; i++) {
+    const arg = args[i];
+    if (arg.startsWith("--")) {
+      continue;
+    }
+    // If the previous argument is a "--" flag, this is its value — skip it.
+    if (args[i - 1].startsWith("--")) {
+      continue;
+    }
+    throw new Error(
+      `It looks like a path ("${arg}") was passed in 'args'. Use the 'src' input to specify paths instead.`,
+    );
+  }
 }
 
 async function runJarl(
